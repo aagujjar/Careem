@@ -1,3 +1,4 @@
+import 'package:driver_app/Allscreens/login_screen.dart';
 import 'package:driver_app/Allscreens/main_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -12,11 +13,12 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Driver App',
       theme: ThemeData(
+        fontFamily: "Signatra",
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       debugShowCheckedModeBanner: false,
-      home: const MainScreen(),
+      home: const LoginScreen(),
     );
   }
 }
