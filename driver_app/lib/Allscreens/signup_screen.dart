@@ -1,9 +1,8 @@
-import 'package:driver_app/Allscreens/signup_screen.dart';
+import 'package:driver_app/Allscreens/login_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:raised_buttons/raised_buttons.dart';
 
-class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
+class SignupScreen extends StatelessWidget {
+  const SignupScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +27,7 @@ class LoginScreen extends StatelessWidget {
                   height: 1.0,
                 ),
                 const Text(
-                  "Login as a Rider",
+                  "Register as a Rider",
                   style: TextStyle(fontSize: 24.0, fontFamily: "Brand Bold"),
                   textAlign: TextAlign.center,
                 ),
@@ -40,9 +39,48 @@ class LoginScreen extends StatelessWidget {
                         height: 1.0,
                       ),
                       TextFormField(
+                        decoration: const InputDecoration(
+                          labelText: "Name",
+                          labelStyle: TextStyle(
+                            fontFamily: "Brand Bold",
+                            fontSize: 14,
+                          ),
+                          hintStyle: TextStyle(
+                            color: Colors.grey,
+                            fontSize: 10.0,
+                          ),
+                        ),
+                        style: const TextStyle(
+                          fontSize: 14.0,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 1.0,
+                      ),
+                      TextFormField(
                         keyboardType: TextInputType.emailAddress,
                         decoration: const InputDecoration(
                           labelText: "Email",
+                          labelStyle: TextStyle(
+                            fontFamily: "Brand Bold",
+                            fontSize: 14,
+                          ),
+                          hintStyle: TextStyle(
+                            color: Colors.grey,
+                            fontSize: 10.0,
+                          ),
+                        ),
+                        style: const TextStyle(
+                          fontSize: 14.0,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 1.0,
+                      ),
+                      TextFormField(
+                        keyboardType: TextInputType.phone,
+                        decoration: const InputDecoration(
+                          labelText: "Phone",
                           labelStyle: TextStyle(
                             fontFamily: "Brand Bold",
                             fontSize: 14,
@@ -82,12 +120,12 @@ class LoginScreen extends StatelessWidget {
                           print("Logged In");
                         },
                         style: ElevatedButton.styleFrom(
-                            fixedSize: Size(1000.0, 50.0),
+                            fixedSize: const Size(1000.0, 50.0),
                             backgroundColor: Colors.yellow,
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(28.0))),
                         child: const Text(
-                          "Login",
+                          "Register",
                           style: TextStyle(
                               fontSize: 18.0,
                               fontFamily: "Brand Bold",
@@ -105,11 +143,11 @@ class LoginScreen extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => const SignupScreen()),
+                          builder: (context) => const LoginScreen()),
                     );
                   },
                   child: const Text(
-                    "Don't have Account? Click here to Register",
+                    "Already have an Account? Login Here",
                     style: TextStyle(
                         color: Colors.black26,
                         fontSize: 14.0,
