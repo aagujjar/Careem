@@ -1,8 +1,18 @@
 import 'package:driver_app/Allscreens/login_screen.dart';
+import 'package:driver_app/Allscreens/main_screen.dart';
+import 'package:driver_app/main.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class SignupScreen extends StatelessWidget {
-  const SignupScreen({super.key});
+  static const String idScreen = "registerScreen";
+  TextEditingController nameTextEditingController = TextEditingController();
+  TextEditingController emailTextEditingController = TextEditingController();
+  TextEditingController phoneTextEditingController = TextEditingController();
+  TextEditingController passwordTextEditingController = TextEditingController();
+
+  SignupScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -39,6 +49,7 @@ class SignupScreen extends StatelessWidget {
                         height: 1.0,
                       ),
                       TextFormField(
+                        controller: nameTextEditingController,
                         decoration: const InputDecoration(
                           labelText: "Name",
                           labelStyle: TextStyle(
@@ -58,6 +69,7 @@ class SignupScreen extends StatelessWidget {
                         height: 1.0,
                       ),
                       TextFormField(
+                        controller: emailTextEditingController,
                         keyboardType: TextInputType.emailAddress,
                         decoration: const InputDecoration(
                           labelText: "Email",
@@ -78,6 +90,7 @@ class SignupScreen extends StatelessWidget {
                         height: 1.0,
                       ),
                       TextFormField(
+                        controller: phoneTextEditingController,
                         keyboardType: TextInputType.phone,
                         decoration: const InputDecoration(
                           labelText: "Phone",
@@ -98,6 +111,7 @@ class SignupScreen extends StatelessWidget {
                         height: 1.0,
                       ),
                       TextFormField(
+                        controller: passwordTextEditingController,
                         obscureText: true,
                         decoration: const InputDecoration(
                           labelText: "Password",
@@ -117,7 +131,25 @@ class SignupScreen extends StatelessWidget {
                       ),
                       ElevatedButton(
                         onPressed: () {
-                          print("Logged In");
+                          if (emailTextEditingController.text.length < 4) {
+                            displayToast(
+                                "Name Must Contain atleast 3 Characters",
+                                context);
+                          } else if (!emailTextEditingController.text
+                              .contains("@")) {
+                            displayToast("Enter the Valid Email", context);
+                          } else if (passwordTextEditingController.text.length <
+                              8) {
+                            displayToast(
+                                "Password Must Contain atleast 7 Characters",
+                                context);
+                          } else if (phoneTextEditingController.text.isEmpty &&
+                              phoneTextEditingController.text.length < 12) {
+                            displayToast(
+                                "Enter the Valid Phone Number", context);
+                          } else {
+                            registerNewUser(context);
+                          }
                         },
                         style: ElevatedButton.styleFrom(
                             fixedSize: const Size(1000.0, 50.0),
@@ -125,7 +157,7 @@ class SignupScreen extends StatelessWidget {
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(28.0))),
                         child: const Text(
-                          "Register",
+                          "Create Account",
                           style: TextStyle(
                               fontSize: 18.0,
                               fontFamily: "Brand Bold",
@@ -140,11 +172,8 @@ class SignupScreen extends StatelessWidget {
                 ),
                 TextButton(
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const LoginScreen()),
-                    );
+                    Navigator.pushNamedAndRemoveUntil(
+                        context, LoginScreen.idScreen, (route) => false);
                   },
                   child: const Text(
                     "Already have an Account? Login Here",
@@ -160,5 +189,37 @@ class SignupScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+
+  void registerNewUser(BuildContext context) async {
+    final User? firebaseUser = (await _firebaseAuth
+            .createUserWithEmailAndPassword(
+                email: emailTextEditingController.text.trim(),
+                password: passwordTextEditingController.text)
+            .catchError((msg) {
+      displayToast("Error:" + msg.toString(), context);
+    }))
+        .user;
+    if (firebaseUser != null) {
+      usersRef.child(firebaseUser.uid);
+      Map userDataMap = {
+        "name": nameTextEditingController.text.trim(),
+        "email": emailTextEditingController.text.trim(),
+        "phone": phoneTextEditingController.text.trim(),
+      };
+      usersRef.child(firebaseUser.uid).set(userDataMap);
+      displayToast("Congratulations, Your Account Has been Created Successfuly",
+          context);
+      Navigator.pushNamedAndRemoveUntil(
+          context, MainScreen.idScreen, (route) => false);
+    } else {
+      displayToast("Account not Created", context);
+    }
+  }
+
+  void displayToast(String msg, BuildContext context) {
+    Fluttertoast.showToast(msg: msg);
   }
 }

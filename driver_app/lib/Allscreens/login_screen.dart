@@ -1,9 +1,19 @@
 import 'package:driver_app/Allscreens/signup_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:raised_buttons/raised_buttons.dart';
 
+import '../main.dart';
+import 'main_screen.dart';
+
 class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
+  static const String idScreen = "loginScreen";
+  TextEditingController emailTextEditingController = TextEditingController();
+  TextEditingController passwordTextEditingController = TextEditingController();
+  LoginScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -40,6 +50,7 @@ class LoginScreen extends StatelessWidget {
                         height: 1.0,
                       ),
                       TextFormField(
+                        controller: emailTextEditingController,
                         keyboardType: TextInputType.emailAddress,
                         decoration: const InputDecoration(
                           labelText: "Email",
@@ -60,6 +71,7 @@ class LoginScreen extends StatelessWidget {
                         height: 1.0,
                       ),
                       TextFormField(
+                        controller: passwordTextEditingController,
                         obscureText: true,
                         decoration: const InputDecoration(
                           labelText: "Password",
@@ -79,7 +91,16 @@ class LoginScreen extends StatelessWidget {
                       ),
                       ElevatedButton(
                         onPressed: () {
-                          print("Logged In");
+                          if (!emailTextEditingController.text.contains("@")) {
+                            displayToast("Enter the Valid Email", context);
+                          } else if (passwordTextEditingController.text.length <
+                              8) {
+                            displayToast(
+                                "Password Must Contain atleast 7 Characters",
+                                context);
+                          } else {
+                            signIn(context);
+                          }
                         },
                         style: ElevatedButton.styleFrom(
                             fixedSize: Size(1000.0, 50.0),
@@ -102,11 +123,8 @@ class LoginScreen extends StatelessWidget {
                 ),
                 TextButton(
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const SignupScreen()),
-                    );
+                    Navigator.pushNamedAndRemoveUntil(
+                        context, SignupScreen.idScreen, (route) => false);
                   },
                   child: const Text(
                     "Don't have Account? Click here to Register",
@@ -123,4 +141,39 @@ class LoginScreen extends StatelessWidget {
       ),
     );
   }
+
+  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+
+  void signIn(BuildContext context) async {
+    final User? firebaseUser = (await _firebaseAuth
+            .signInWithEmailAndPassword(
+                email: emailTextEditingController.text,
+                password: passwordTextEditingController.text)
+            .catchError((msg) {
+      displayToast("Error:" + msg.toString(), context);
+    }))
+        .user;
+    if (firebaseUser != null) {
+      usersRef
+          .child(firebaseUser.uid)
+          .once()
+          .then((value) => (DataSnapshot snap) {
+                if (snap.value != null) {
+                  Navigator.pushNamedAndRemoveUntil(
+                      context, MainScreen.idScreen, (route) => false);
+                  displayToast("Congratulations, Login SuccessFully", context);
+                } else {
+                  _firebaseAuth.signOut();
+                  displayToast(
+                      "Account no Found!, Register Yourself First", context);
+                }
+              });
+    } else {
+      displayToast("Account no Found!, Register Yourself First", context);
+    }
+  }
+}
+
+void displayToast(String msg, BuildContext context) {
+  Fluttertoast.showToast(msg: msg);
 }
